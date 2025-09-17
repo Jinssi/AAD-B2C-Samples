@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<TrustFrameworkPolicy
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns="http://schemas.microsoft.com/online/cpim/schemas/2013/06"
+  PolicySchemaVersion="0.3.0.0"
+  TenantId="yourtenant.onmicrosoft.com"
+  PolicyId="B2C_1A_TrustFrameworkExtensions"
+  PublicPolicyUri="http://yourtenant.onmicrosoft.com/B2C_1A_TrustFrameworkExtensions">
+  
+  <BasePolicy>
+    <TenantId>yourtenant.onmicrosoft.com</TenantId>
+    <PolicyId>B2C_1A_TrustFrameworkBase</PolicyId>
+  </BasePolicy>
+  
+  <BuildingBlocks>
+    <!-- Define claim types -->
+    <ClaimsSchema>
+      <!-- Define a boolean claim to track if email was provided through query parameter -->
+      <ClaimType Id="isEmailProvided">
+        <DisplayName>Email was provided via query parameter</DisplayName>
+        <DataType>boolean</DataType>
+      </ClaimType>
+      
+      <!-- Define a claim for storing the pre-filled email -->
+      <ClaimType Id="prefilledEmail">
+        <DisplayName>Pre-filled Email Address</DisplayName>
+        <DataType>string</DataType>
+        <UserHelpText>Email address provided through query parameter</UserHelpText>
+      </ClaimType>
+    </ClaimsSchema>
+    
+    <!-- Define claim transformations -->
+    <ClaimsTransformations>
+      <!-- Transform to check if email is provided through query parameter -->
+      <ClaimsTransformation Id="CheckIfEmailIsProvided" TransformationMethod="CheckIfStringIsNotNullOrEmpty">
+        <InputClaims>
+          <InputClaim ClaimTypeReferenceId="prefilledEmail" TransformationClaimType="inputString" />
+        </InputClaims>
+        <OutputClaims>
+          <OutputClaim ClaimTypeReferenceId="isEmailProvided" TransformationClaimType="outputClaim" />
+        </OutputClaims>
+      </ClaimsTransformation>
+      
+      <!-- Copy prefilled email to the regular email claim if provided -->
+      <ClaimsTransformation Id="CopyPrefilledEmailToEmailAddressClaim" TransformationMethod="CopyClaimToClaimType">
+        <InputClaims>
+          <InputClaim ClaimTypeReferenceId="prefilledEmail" TransformationClaimType="inputClaim" />
+        </InputClaims>
+        <OutputClaims>
+          <OutputClaim ClaimTypeReferenceId="email" TransformationClaimType="outputClaim" />
+        </OutputClaims>
+        <InputParameters>
+          <InputParameter Id="matchCondition" DataType="string" Value="{ClaimTypeReferenceId1}" />
+        </InputParameters>
+      </ClaimsTransformation>
+    </ClaimsTransformations>
+  </BuildingBlocks>
+
+  <ClaimsProviders>
+    <!-- Add claim resolver for custom query parameter -->
+    <ClaimsProvider>
+      <DisplayName>Claims Transformations</DisplayName>
+      <TechnicalProfiles>
+        <TechnicalProfile Id="QueryParameterClaims">
+          <DisplayName>Query Parameter Claims</DisplayName>
+          <Protocol Name="Proprietary" Handler="Web.TPEngine.Providers.ClaimsTransformationProtocolProvider, Web.TPEngine, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
+          <OutputClaims>
+            <!-- Map custom query parameter 'email_address' to prefilledEmail claim -->
+            <OutputClaim ClaimTypeReferenceId="prefilledEmail" DefaultValue="" />
+            <OutputClaim ClaimTypeReferenceId="prefilledEmail" PartnerClaimType="{OAUTH-KV:email_address}" />
+          </OutputClaims>
+          <OutputClaimsTransformations>
+            <OutputClaimsTransformation ReferenceId="CheckIfEmailIsProvided" />
+            <OutputClaimsTransformation ReferenceId="CopyPrefilledEmailToEmailAddressClaim" />
+          </OutputClaimsTransformations>
+        </TechnicalProfile>
+      </TechnicalProfiles>
+    </ClaimsProvider>
+  </ClaimsProviders>
+</TrustFrameworkPolicy>
