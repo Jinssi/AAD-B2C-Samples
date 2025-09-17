@@ -33,4 +33,3 @@ This repository contains sample code for implementing a customized Azure AD B2C 
 ## Documentation
 
 For more information on Azure AD B2C custom policies, see the [official documentation](https://docs.microsoft.com/en-us/azure/active-directory-b2c/custom-policy-overview).
-"@ | Out-File -FilePath "README.md" -Encoding utf8
