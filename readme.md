@@ -1,4 +1,3 @@
-@"
 # Azure AD B2C Custom Password Reset with Email Verification
 
 This repository contains sample code for implementing a customized Azure AD B2C password reset journey with email verification using SendGrid OTP. The implementation addresses a specific scenario where an application needs to handle user emails across password reset and subsequent login flows.
